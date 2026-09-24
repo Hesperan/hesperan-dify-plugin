@@ -1,0 +1,30 @@
+identity:
+  author: hesperan
+  name: hesperan
+  label:
+    en_US: Hesperan
+  description:
+    en_US: Calibrated decisions for automation. Ask typed questions and get probabilities, or decide with a calibrated profile that says whether a case is safe to automate. Returns numbers, never generated text.
+  icon: icon.png
+  icon_dark: icon-dark.png
+  tags:
+    - business
+    - productivity
+credentials_for_provider:
+  hesperan_api_key:
+    type: secret-input
+    required: true
+    label:
+      en_US: Hesperan API key
+    placeholder:
+      en_US: hsp_...
+    help:
+      en_US: Create a key in the Hesperan console under API keys. Checking the key is free.
+    url: https://hesperan.com/console
+tools:
+  - tools/decide_with_profile.yaml
+  - tools/ask.yaml
+  - tools/report_outcome.yaml
+extra:
+  python:
+    source: provider/hesperan.py

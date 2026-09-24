@@ -1,0 +1,43 @@
+identity:
+  name: report_outcome
+  author: hesperan
+  label:
+    en_US: Report outcome
+description:
+  human:
+    en_US: Tell Hesperan the correct answer for an earlier decision, so the console can show the live precision of automated decisions. Free of charge.
+  llm: Record the correct answer for a decision made earlier with decide_with_profile, identified by its decision_id. Use once the real outcome is known, for auto and review decisions alike. Repeating the same answer is accepted; a different answer is refused.
+parameters:
+  - name: decision_id
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Decision ID
+    human_description:
+      en_US: The decision_id returned by Decide with profile.
+    llm_description: The decision_id returned by decide_with_profile.
+  - name: actual
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Correct answer
+    human_description:
+      en_US: The answer that turned out to be right; one of the profile's answer keys (for a yes/no profile, true or false). The keys are listed per profile in the Hesperan console and as "options" by GET /v1/profiles.
+    llm_description: The correct answer key, one of the profile's answers.
+output_schema:
+  type: object
+  properties:
+    ok:
+      type: boolean
+    duplicate:
+      type: boolean
+      description: True when the same outcome had already been reported.
+    decision_id:
+      type: string
+    actual:
+      type: string
+extra:
+  python:
+    source: tools/report_outcome.py

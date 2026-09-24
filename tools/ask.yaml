@@ -1,0 +1,99 @@
+identity:
+  name: ask
+  author: hesperan
+  label:
+    en_US: Ask a question
+description:
+  human:
+    en_US: Ask one typed question about a text or JSON state and get probabilities back - pick one option, check a yes/no statement, or rate on a scale.
+  llm: Answer one typed question about a state with probabilities. question_type "choice" picks one of the given options, "yes_no" gives the probability that a statement is true, "score" rates on the given levels. Returns numbers, not text. Use decide_with_profile instead when a calibrated profile exists.
+parameters:
+  - name: state
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: State
+    human_description:
+      en_US: What the question is about, as plain text or a JSON object. Up to 256 KB.
+    llm_description: The text or JSON the question is about.
+  - name: state_is_json
+    type: boolean
+    required: false
+    default: false
+    form: form
+    label:
+      en_US: State is JSON
+    human_description:
+      en_US: Turn on when State is a JSON object or array; it is then sent as structured data.
+  - name: question_type
+    type: select
+    required: true
+    default: choice
+    form: llm
+    label:
+      en_US: Question type
+    human_description:
+      en_US: Choice picks one option, Yes / No checks a statement, Score rates on a scale you define.
+    llm_description: One of choice, yes_no, score.
+    options:
+      - value: choice
+        label:
+          en_US: Choice (pick one option)
+      - value: yes_no
+        label:
+          en_US: Yes / No (is a statement true?)
+      - value: score
+        label:
+          en_US: Score (rate on a scale)
+  - name: question
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Question
+    human_description:
+      en_US: For Choice and Score, the question, for example "Which team should handle this ticket?". For Yes / No, a statement, for example "This email is a phishing attempt."
+    llm_description: The question for choice and score; for yes_no, a statement that is either true or false.
+  - name: options
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Options
+    human_description:
+      en_US: "Choice: one option per line as 'key: meaning', at least two (or a JSON object). Score: one level per line, lowest first (or a JSON array). Yes / No: optional lines 'yes: ...' and 'no: ...'."
+    llm_description: "choice: one option per line as 'key: meaning' (keys without spaces); score: one level description per line, lowest first; yes_no: optional lines 'yes: ...' and 'no: ...'."
+output_schema:
+  type: object
+  properties:
+    question_type:
+      type: string
+      description: choice, yes_no or score.
+    answer:
+      type: string
+      description: "choice: the most likely option key; yes_no: yes or no, whichever is more likely."
+    probability:
+      type: number
+      description: "choice: probability of the answer."
+    probability_yes:
+      type: number
+      description: "yes_no: probability that the statement is true."
+    probability_no:
+      type: number
+    score:
+      type: number
+      description: "score: expected level, sum of level times probability."
+    most_likely_level:
+      type: string
+      description: "score: index of the most likely level, lowest level is 0."
+    probabilities:
+      type: object
+      description: "choice and score: probability per option or level."
+    model:
+      type: string
+    input_tokens:
+      type: integer
+extra:
+  python:
+    source: tools/ask.py

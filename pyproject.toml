@@ -1,0 +1,8 @@
+[project]
+name = "hesperan"
+version = "0.0.1"
+requires-python = ">=3.12"
+dependencies = [
+    "dify_plugin>=0.10.2,<0.11.0",
+    "httpx>=0.28.1,<1.0.0",
+]

@@ -1,0 +1,85 @@
+identity:
+  name: decide_with_profile
+  author: hesperan
+  label:
+    en_US: Decide with profile
+description:
+  human:
+    en_US: Get a calibrated decision from one of your Hesperan decision profiles, with the action "auto" (act on it) or "review" (hand it to a person).
+  llm: Decide one case with a calibrated Hesperan decision profile. Returns the decision, its calibrated confidence and action "auto" (safe to act on) or "review" (a person should decide), plus a decision_id for reporting the correct answer later. Each call is billed; pass an idempotency key to make retries safe.
+parameters:
+  - name: profile
+    type: dynamic-select
+    required: true
+    form: form
+    label:
+      en_US: Profile
+    human_description:
+      en_US: A calibrated decision profile from your Hesperan account, listed with name and slug. Profiles marked "not calibrated yet" cannot decide until their calibration in the Hesperan console succeeds.
+    llm_description: Slug of the decision profile, for example ticket-routing.
+  - name: state
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: State
+    human_description:
+      en_US: What the decision is about, for example the text of a ticket, or a JSON object with the relevant fields. Up to 256 KB.
+    llm_description: The case to decide, as plain text or as a JSON object with the relevant fields.
+  - name: state_is_json
+    type: boolean
+    required: false
+    default: false
+    form: form
+    label:
+      en_US: State is JSON
+    human_description:
+      en_US: Turn on when State is a JSON object or array; it is then sent as structured data.
+  - name: idempotency_key
+    type: string
+    required: false
+    form: llm
+    label:
+      en_US: Idempotency key
+    human_description:
+      en_US: Optional stable ID of the case, for example the ticket ID (1 to 255 visible ASCII characters). The same key with the same state within 24 hours returns the first decision and is not charged again.
+    llm_description: Optional stable ID of the case, for example a ticket ID, so that a retry is not charged twice.
+output_schema:
+  type: object
+  properties:
+    decision_id:
+      type: string
+      description: ID of the logged decision; use it to report the correct answer later.
+    profile:
+      type: string
+    decision:
+      type: string
+      description: The calibrated decision (one of the profile's answer keys).
+    confidence:
+      type: number
+      description: Calibrated probability of the decision on your data.
+    action:
+      type: string
+      description: '"auto" when the confidence is at or above the threshold, otherwise "review".'
+    automate:
+      type: boolean
+      description: True when action is "auto".
+    threshold:
+      type: number
+      description: Current threshold; null when nothing can be automated at the target yet.
+    target_precision:
+      type: number
+    calibration_version:
+      type: integer
+    probabilities:
+      type: object
+      description: Calibrated probability per answer.
+    raw_probabilities:
+      type: object
+      description: Uncalibrated model probability per answer.
+    replayed:
+      type: boolean
+      description: True when an earlier decision was returned for the same idempotency key.
+extra:
+  python:
+    source: tools/decide_with_profile.py
